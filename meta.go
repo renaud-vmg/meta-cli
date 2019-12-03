@@ -495,12 +495,21 @@ func finalRecover() {
 	successExit()
 }
 
+func getMetaDirPath() string {
+	// Check environment for the presence of SD_META_DIR. Set metaspace to match if it's there
+	metaSpaceDir, metaSpaceDirIsThere := os.LookupEnv("SD_META_DIR")
+	if metaSpaceDirIsThere {
+		return metaSpaceDir
+	}
+	return defaultMetaSpace
+}
+
 func main() {
 	defer finalRecover()
 
 	// Set to defaults in case not all commands alter these variables with flags.
 	metaSpec := MetaSpec{
-		MetaSpace:                    defaultMetaSpace,
+		MetaSpace:                    getMetaDirPath(),
 		SkipFetchNonexistentExternal: false,
 		MetaFile:                     defaultMetaFile,
 		JSONValue:                    false,
@@ -523,7 +532,7 @@ func main() {
 	metaSpaceFlag := cli.StringFlag{
 		Name:        "meta-space",
 		Usage:       "Location of meta temporarily",
-		Value:       "/sd/meta",
+		Value:       getMetaDirPath(),
 		Destination: &metaSpec.MetaSpace,
 	}
 	externalFlag := cli.StringFlag{
